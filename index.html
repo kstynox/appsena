@@ -340,6 +340,37 @@
     "desc": "Sorteo con visualización tipo cuadros, contador y registro de ganadores.",
     "emoji": "🎯"
   },
+
+  {
+    "id": "juegos-gamificacion",
+    "name": "Juegos de Gamificación",
+    "category": "Dinámicas de clase / Gamificación",
+    "roles": [
+      "Instructor",
+      "Aprendiz"
+    ],
+    "inputs": "Listas de palabras/pistas o pares término–definición (pegado desde Excel o texto)",
+    "outputs": "Juego previsualizado + exportación HTML (jugador) + exportación PDF",
+    "needs": "Navegador moderno (sin backend)",
+    "url": "https://gamificacion-235k.onrender.com",
+    "desc": "Creador de mini-juegos para gamificación (sopa de letras, crucigrama, palabra secreta, ahorcado, anagrama, emparejados, memoria y parejas) con previsualización y exportación.",
+    "emoji": "🎮"
+  },
+  {
+    "id": "bingo-musical",
+    "name": "Bingo Musical",
+    "category": "Dinámicas de clase / Gamificación",
+    "roles": [
+      "Instructor",
+      "Aprendiz"
+    ],
+    "inputs": "Carpeta local con audios/videos (mp3, mp4, webm, ogg, wav, m4a, etc.)",
+    "outputs": "Tablero de bingo (25 canciones) + reproducción manual/aleatoria + descarga de tablero.html",
+    "needs": "Chrome/Edge (selección de carpeta con webkitdirectory) + navegador moderno",
+    "url": "https://bingomusical-t2va.onrender.com",
+    "desc": "Generador de Bingo Musical offline: carga una carpeta de canciones, arma una base (p. ej., 75) y selecciona 25 para jugar, con tablero autocontenido y control de reproducción.",
+    "emoji": "🎵"
+  },
   {
     "id": "panel-integral-fpi",
     "name": "SENA 360 – Panel Integral de Acta de Comité de evaluación y Seguimiento",
@@ -370,7 +401,22 @@
     "url": "https://fichalectiva.onrender.com",
     "desc": "Genera un reporte de fichas de formación titulada desde el PE-04, aplicando filtros y mostrando indicadores para seguimiento por modalidad, municipio y programa.",
     "emoji": "📊"
-  }
+  },
+
+{
+  "id": "programador-ambiente",
+  "name": "Programador de ambiente",
+  "category": "Planeación / Ambientes",
+  "roles": [
+    "Coordinador"
+  ],
+  "inputs": "Archivo .xml (P4-04 / PE-04)",
+  "outputs": "Programación (ambiente × jornada) + exportación a Excel + exportación/impresión PDF",
+  "needs": "Navegador moderno + archivo PE-04 (.xml)",
+  "url": "https://programacionambientes.onrender.com",
+  "desc": "Planificador de Ambientes y Horarios: carga el PE-04/P4-04, filtra por centro/municipio/programa y permite exportar la programación.",
+  "emoji": "🏫"
+}
 ];
   const roleBadges = {
   "Instructor": {
@@ -513,6 +559,23 @@
 
   function openManual(project){
     const key = project.id;
+
+    // Manual en construcción para nuevos módulos
+    if(key === "juegos-gamificacion" || key === "bingo-musical" || key === "programador-ambiente"){
+      $title.textContent = "Manual de usuario";
+      $sub.textContent = project.name;
+      $openNew.href = "#";
+      $openDrive.href = "#";
+      $openNew.style.display = "none";
+      $openDrive.style.display = "none";
+
+      $large.checked = false;
+      $modal.classList.remove('large');
+
+      $body.innerHTML = `<div class="modal-loading">En construccion</div>`;
+      $overlay.classList.add("show");
+      return;
+    }
     const iframeHtml = manuals[key];
     const src = parseIframeSrc(iframeHtml);
 
