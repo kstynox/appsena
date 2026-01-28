@@ -442,7 +442,11 @@
   "quizsena": "<iframe src=\"https://drive.google.com/file/d/1z6RtTdGPcHyjM_Rw4ItzV5kvCWs5a88e/preview\" width=\"640\" height=\"480\"></iframe>",
   "selector-aleatorio": "<iframe src=\"https://drive.google.com/file/d/10Ro0OXAXucrgHuEjPlaTeSWTunUjQ5M2/preview\" width=\"640\" height=\"480\"></iframe>",
   "panel-integral-fpi": "<iframe src=\"https://drive.google.com/file/d/1RqthgLZbUXz0lD6LOQSPltx7yVbwacmU/preview\" width=\"640\" height=\"480\"></iframe>",
-  "fichas-formacion-titulada": "<iframe src=\"https://drive.google.com/file/d/1Qa_c7mxUYamr7M4t4l2itNDVDbGQYP-B/preview\" width=\"640\" height=\"480\" allow=\"autoplay\"></iframe>"
+  "fichas-formacion-titulada": "<iframe src=\"https://drive.google.com/file/d/1Qa_c7mxUYamr7M4t4l2itNDVDbGQYP-B/preview\" width=\"640\" height=\"480\" allow=\"autoplay\"></iframe>",
+  "bingo-musical": "<iframe src=\"https://drive.google.com/file/d/1mItXTHJIQM_bKiR-ealyE7KG1aVbDG56/preview\" width=\"640\" height=\"480\"></iframe>",
+  "juegos-gamificacion": "<iframe src=\"https://drive.google.com/file/d/1hEudFgOJdLxLOa_SRHQ8pbVlf2ZwElRu/preview\" width=\"640\" height=\"480\"></iframe>",
+  "programador-ambiente": "<iframe src=\"https://drive.google.com/file/d/1luZ4ctKgnxeS4DQEzWMknRotIk2ZGApY/preview\" width=\"640\" height=\"480\"></iframe>"
+
 };
 
   // Sinónimos simples para búsqueda
@@ -559,23 +563,6 @@
 
   function openManual(project){
     const key = project.id;
-
-    // Manual en construcción para nuevos módulos
-    if(key === "juegos-gamificacion" || key === "bingo-musical" || key === "programador-ambiente"){
-      $title.textContent = "Manual de usuario";
-      $sub.textContent = project.name;
-      $openNew.href = "#";
-      $openDrive.href = "#";
-      $openNew.style.display = "none";
-      $openDrive.style.display = "none";
-
-      $large.checked = false;
-      $modal.classList.remove('large');
-
-      $body.innerHTML = `<div class="modal-loading">En construccion</div>`;
-      $overlay.classList.add("show");
-      return;
-    }
     const iframeHtml = manuals[key];
     const src = parseIframeSrc(iframeHtml);
 
