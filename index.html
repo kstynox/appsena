@@ -18,7 +18,7 @@
 
     /* Header institucional */
     .site-header{ background:#fff; border-top:1px solid var(--border); box-shadow:0 2px 10px rgba(15,23,42,.06); position:sticky; top:0; z-index:10; }
-    .header-wrap{ max-width:1200px; margin:0 auto; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .header-wrap{ max-width:90vw; margin:0 auto; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
     .header-left{ display:flex; align-items:center; gap:14px; min-width:0; }
     .header-logo{ width:58px; height:58px; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
     .header-logo img{ width:100%; height:100%; object-fit:contain; }
@@ -29,7 +29,7 @@
     .header-greenline{ height:4px; background:var(--brand); }
     @media (max-width: 900px){ .header-wrap{ flex-direction:column; align-items:flex-start; } .header-title{ text-align:left; font-size:18px; } }
 
-    main{ max-width:1200px; margin:18px auto 24px; padding:0 16px; display:flex; flex-direction:column; gap:16px; flex:1; }
+    main{ max-width:90vw; margin:18px auto 24px; padding:0 16px; display:flex; flex-direction:column; gap:16px; flex:1; }
 
     .card{ background: var(--card); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow2); overflow:hidden; }
     .card-h{ padding:14px 14px 12px; border-bottom:1px solid var(--border); background: var(--soft); }
@@ -54,8 +54,11 @@
     .btn.small{ padding: 9px 10px; font-size: 12.5px; }
 
     /* Grid */
-    .grid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:14px; }
+    .grid{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:14px; }
+    @media (max-width: 1220px){ .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+
+    .btn[disabled], .btn.disabled{ opacity:.55; cursor:not-allowed; pointer-events:none; filter:saturate(.7); }
 
     /* Highlight */
     mark.hl{ background: rgba(245,158,11,.22); border: 1px solid rgba(245,158,11,.22); border-radius: 6px; padding: 0 2px; }
@@ -111,9 +114,9 @@
     }
 
     /* Footer pill */
-    footer.bottom-footer{ margin: 18px auto 22px; padding: 0 16px; max-width:1200px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+    footer.bottom-footer{ margin: 18px auto 22px; padding: 0 16px; max-width:90vw; display:flex; flex-direction:column; align-items:center; gap:10px; }
     .footer-kicker{ font-size: 12px; letter-spacing: .25em; color: #94a3b8; font-weight: 900; text-transform: uppercase; }
-    .footer-card{ width: min(980px, 100%); background:#fff; border:1px solid var(--border); border-radius: 999px; padding: 10px 12px; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow: 0 8px 24px rgba(15,23,42,.06); }
+    .footer-card{ width: 100%; background:#fff; border:1px solid var(--border); border-radius: 999px; padding: 10px 12px; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow: 0 8px 24px rgba(15,23,42,.06); }
     .pill-left,.pill-right{ display:flex; align-items:center; gap:10px; }
     .pill-center{ display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
     .pill-btn{ width:40px; height:40px; border-radius:999px; border:none; cursor:default; display:flex; align-items:center; justify-content:center; background: rgba(57,169,0,.12); color: var(--brand); }
@@ -241,6 +244,7 @@
     "desc": "Calendario anual con captura por líneas (fecha y nombre), normalización y opción de guardado en navegador.",
     "emoji": "🎂"
   },
+
   {
     "id": "duplicados-similitud",
     "name": "SENA 360 – Detector de Duplicados y Similitud",
@@ -255,6 +259,7 @@
     "desc": "Analiza localmente duplicados exactos (SHA-256) y similitud de contenido. No sube archivos a internet.",
     "emoji": "🕵️‍♂️"
   },
+
   {
     "id": "fichas-complementarias",
     "name": "Generador de Fichas Complementarias",
@@ -269,6 +274,7 @@
     "desc": "Genera fichas de cursos complementarios con control de festivos/domingos y validación de solapamientos.",
     "emoji": "🗂️"
   },
+
   {
     "id": "llamados-atencion",
     "name": "Llamados de Atención",
@@ -283,6 +289,7 @@
     "desc": "Carga juicios, permite seleccionar motivos y genera PDFs.",
     "emoji": "⚠️"
   },
+
   {
     "id": "plan-mejoramiento",
     "name": "Plan de Mejoramiento para aprendices",
@@ -297,6 +304,7 @@
     "desc": "Construcción/gestión de planes de mejoramiento por aprendiz, con soporte de anexos.",
     "emoji": "🛠️"
   },
+
   {
     "id": "protocolo-diario",
     "name": "Protocolo de Sesion",
@@ -311,6 +319,7 @@
     "desc": "Generador/plantilla de acta con estructura formal y campos variables.",
     "emoji": "📝"
   },
+
   {
     "id": "quizsena",
     "name": "QuizSENA",
@@ -325,6 +334,43 @@
     "desc": "Generador de quiz a partir de Excel, interfaz moderna y carga/parseo en navegador.",
     "emoji": "🧠"
   },
+
+  {
+    "id": "quizzimage",
+    "name": "QuizzImage – Generador de Quizz con Imágenes",
+    "category": "Juegos didácticos / Evaluación",
+    "roles": [
+      "Instructor",
+      "Aprendiz"
+    ],
+    "inputs": "Imágenes (carpeta o selección múltiple) + datos (título, instructor, tema)",
+    "outputs": "Juego Quizz / Aleatorio + exporta 1 HTML",
+    "needs": "Navegador moderno (offline).",
+    "url": "https://quizzimage.onrender.com",
+    "desc": "Generador offline que construye un juego tipo quizz basado en imágenes: carga banco, configura modo, opciones y temporizador (solo Quizz) y exporta un HTML listo para usar.",
+    "emoji": "🧠",
+    "iconTop": "🧠",
+    "iconBottom": "🖼️"
+  },
+
+  {
+    "id": "pingame",
+    "name": "PinGame – Juego de Pines sobre Imagen",
+    "category": "Juegos didácticos / Interactivo",
+    "roles": [
+      "Instructor",
+      "Aprendiz"
+    ],
+    "inputs": "Imagen + pines (texto/pista) + configuración",
+    "outputs": "Juego interactivo (imagen con pines) + exporta 1 HTML",
+    "needs": "Navegador moderno (offline).",
+    "url": "https://pingame.onrender.com",
+    "desc": "Creador offline para armar actividades tipo 'pines sobre imagen': carga una imagen, ubica pines con texto y exporta un HTML listo para compartir.",
+    "emoji": "📍",
+    "iconTop": "🖼️",
+    "iconBottom": "📍"
+  },
+
   {
     "id": "selector-aleatorio",
     "name": "Selector aleatorio",
@@ -356,6 +402,7 @@
     "desc": "Creador de mini-juegos para gamificación (sopa de letras, crucigrama, palabra secreta, ahorcado, anagrama, emparejados, memoria y parejas) con previsualización y exportación.",
     "emoji": "🎮"
   },
+
   {
     "id": "bingo-musical",
     "name": "Bingo Musical",
@@ -371,6 +418,7 @@
     "desc": "Generador de Bingo Musical offline: carga una carpeta de canciones, arma una base (p. ej., 75) y selecciona 25 para jugar, con tablero autocontenido y control de reproducción.",
     "emoji": "🎵"
   },
+
   {
     "id": "panel-integral-fpi",
     "name": "SENA 360 – Panel Integral de Acta de Comité de evaluación y Seguimiento",
@@ -387,6 +435,7 @@
     "emoji": "📊",
     "shortName": "Panel integral FPI"
   },
+
   {
     "id": "fichas-formacion-titulada",
     "name": "Fichas formación titulada",
@@ -403,21 +452,22 @@
     "emoji": "📊"
   },
 
-{
-  "id": "programador-ambiente",
-  "name": "Programador de ambiente",
-  "category": "Planeación / Ambientes",
-  "roles": [
-    "Coordinador"
-  ],
-  "inputs": "Archivo .xml (P4-04 / PE-04)",
-  "outputs": "Programación (ambiente × jornada) + exportación a Excel + exportación/impresión PDF",
-  "needs": "Navegador moderno + archivo PE-04 (.xml)",
-  "url": "https://programacionambientes.onrender.com",
-  "desc": "Planificador de Ambientes y Horarios: carga el PE-04/P4-04, filtra por centro/municipio/programa y permite exportar la programación.",
-  "emoji": "🏫"
-}
-];
+  {
+    "id": "programador-ambiente",
+    "name": "Programador de ambiente",
+    "category": "Planeación / Ambientes",
+    "roles": [
+      "Coordinador"
+    ],
+    "inputs": "Archivo .xml (P4-04 / PE-04)",
+    "outputs": "Programación (ambiente × jornada) + exportación a Excel + exportación/impresión PDF",
+    "needs": "Navegador moderno + archivo PE-04 (.xml)",
+    "url": "https://programacionambientes.onrender.com",
+    "desc": "Planificador de Ambientes y Horarios: carga el PE-04/P4-04, filtra por centro/municipio/programa y permite exportar la programación.",
+    "emoji": "🏫"
+  }
+
+  ];
   const roleBadges = {
   "Instructor": {
     "emoji": "👨‍🏫",
@@ -662,6 +712,31 @@
     `;
   }
 
+  function stackedIconSvg(topEmoji, bottomEmoji){
+    const safeTop = String(topEmoji||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").slice(0, 10);
+    const safeBot = String(bottomEmoji||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").slice(0, 10);
+    return `
+      <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#dff5d1"/>
+            <stop offset="1" stop-color="#ffffff"/>
+          </linearGradient>
+        </defs>
+        <rect x="4" y="4" width="112" height="112" rx="26" fill="url(#g2)" stroke="rgba(57,169,0,.22)" stroke-width="3"/>
+        <text x="60" y="54" text-anchor="middle" font-size="52" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, system-ui">${safeTop}</text>
+        <text x="60" y="98" text-anchor="middle" font-size="52" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, system-ui">${safeBot}</text>
+      </svg>
+    `;
+  }
+
+  function projectIcon(p){
+    if(p && p.iconTop && p.iconBottom) return stackedIconSvg(p.iconTop, p.iconBottom);
+    if(p && p.iconSvg) return p.iconSvg;
+    return emojiIconSvg(p?.emoji);
+  }
+
+
   function roleClass(r){
     const key = String(r||"").toLowerCase();
     if(key.includes("instructor")) return "instructor";
@@ -674,6 +749,9 @@
     const displayName = p.shortName || p.name;
     const isLong = (p.name || "").length > 40;
     const tooltip = isLong ? `title="${esc(p.name)}"` : "";
+
+    const url = String(p.url || "").trim();
+    const hasUrl = !!url;
 
     const roleBadgesHtml = (p.roles || []).map(r => {
       const b = roleBadges[r] || {emoji:"🏷️", label:r};
@@ -696,7 +774,7 @@
     return `
       <article class="proj" id="${esc(p.id)}">
         <div class="proj-top">
-          <div class="proj-icon" aria-hidden="true">${emojiIconSvg(p.emoji)}</div>
+          <div class="proj-icon" aria-hidden="true">${projectIcon(p)}</div>
           <div class="proj-badges">${roleBadgesHtml}</div>
         </div>
 
@@ -721,17 +799,23 @@
 
         <div class="proj-footer">
           <div class="proj-actions">
-            <button class="btn small subtle" type="button" data-copy="${esc(p.url)}" aria-label="Copiar URL"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            ${hasUrl ? `
+            <button class="btn small subtle" type="button" data-copy="${esc(url)}" aria-label="Copiar URL"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
   <path fill="currentColor" d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1Zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H10V7h9v14Z"/>
-</svg> Copiar</button>
+</svg> Copiar</button>` : `
+            <button class="btn small subtle" type="button" disabled title="Enlace pendiente" aria-label="Enlace pendiente"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+  <path fill="currentColor" d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1Zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H10V7h9v14Z"/>
+</svg> Copiar</button>`}
             <button class="btn small subtle" type="button" data-manual="${esc(p.id)}" aria-label="Abrir manual"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
   <path fill="currentColor" d="M6 4h11a2 2 0 0 1 2 2v14a1 1 0 0 1-1.45.9L12 18.62 6.45 20.9A1 1 0 0 1 5 20V6a2 2 0 0 1 1-2Zm1 2v12.5l5-2.06 5 2.06V6H7Z"/>
 </svg> Manual</button>
           </div>
           <div class="proj-actions">
-            <a class="btn small primary" href="${esc(p.url)}" target="_blank" rel="noopener" aria-label="Abrir aplicación en nueva pestaña">Abrir <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            ${hasUrl ? `
+            <a class="btn small primary" href="${esc(url)}" target="_blank" rel="noopener" aria-label="Abrir aplicación en nueva pestaña">Abrir <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
   <path fill="currentColor" d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z"/>
-</svg></a>
+</svg></a>` : `
+            <button class="btn small primary" type="button" disabled title="Enlace pendiente" aria-label="Enlace pendiente">Enlace pendiente</button>`}
           </div>
         </div>
       </article>
