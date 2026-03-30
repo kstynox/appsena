@@ -699,6 +699,35 @@ async function loadLogsFromDb(){
   }
 }
 
+
+async function backfillGeoForCurrentSession(geo){
+  if(!geo || !Array.isArray(analyticsLogsCache) || !analyticsLogsCache.length) return false;
+  const geoPatch = {
+    ip: geo.ip || "",
+    country: geo.country || "",
+    region: geo.region || "",
+    city: geo.city || "",
+    latitude: geo.latitude ?? "",
+    longitude: geo.longitude ?? "",
+    isp: geo.isp || "",
+    organization: geo.org || ""
+  };
+  let changed = false;
+  analyticsLogsCache = analyticsLogsCache.map((log) => {
+    if(!log || log.sessionId !== sessionId) return log;
+    const missingGeo = !(log.ip || log.country || log.region || log.city || log.latitude || log.longitude || log.isp || log.organization);
+    if(!missingGeo) return log;
+    changed = true;
+    return compactLogEntry({ ...log, ...geoPatch });
+  });
+  if(changed){
+    await persistLogsToDb(analyticsLogsCache);
+    scheduleAutoSaveExcel(true);
+    updateAnalyticsUi();
+  }
+  return changed;
+}
+
 async function clearLogsDb(){
   analyticsLogsCache = [];
   try {
@@ -844,22 +873,32 @@ async function tryGeoEndpoint(url){
 async function loadGeoData(){
   analyticsGeo = getGeoCache();
   updateAnalyticsUi();
-  if(FILE_MODE) return;
+
+  if(analyticsGeo && (analyticsGeo.ip || analyticsGeo.country || analyticsGeo.region || analyticsGeo.city)){
+    return analyticsGeo;
+  }
+
+  if(FILE_MODE) return null;
+
   const endpoints = [
     "https://ipapi.co/json/",
     "https://ipwho.is/?fields=success,ip,country,region,city,latitude,longitude,timezone,connection"
   ];
+
   for(const endpoint of endpoints){
     try {
       const normalized = await tryGeoEndpoint(endpoint);
-      if(normalized){
+      if(normalized && (normalized.ip || normalized.country || normalized.region || normalized.city)){
         analyticsGeo = normalized;
         localStorage.setItem(ANALYTICS_GEO_KEY, JSON.stringify(normalized));
+        await backfillGeoForCurrentSession(normalized);
         updateAnalyticsUi();
-        return;
+        return normalized;
       }
     } catch(e){}
   }
+
+  return null;
 }
 
 function commonEventData(){
@@ -1189,9 +1228,22 @@ async function initAnalytics(){
   }, 60000);
 
   updateAnalyticsUi();
-  loadGeoData();
+  const geoReady = Promise.race([
+    loadGeoData(),
+    new Promise((resolve) => setTimeout(() => resolve(null), 2200))
+  ]);
   restoreLinkedFile();
+  await geoReady;
   trackEvent("page_view", { actionDetail: FILE_MODE ? "entrada_local" : "entrada" });
+
+  if(!FILE_MODE){
+    setTimeout(async () => {
+      const resolvedGeo = await loadGeoData();
+      if(resolvedGeo && (resolvedGeo.ip || resolvedGeo.country || resolvedGeo.region || resolvedGeo.city)){
+        trackEvent("geo_loaded", { actionDetail: "ubicacion_ip_resuelta" });
+      }
+    }, 2500);
+  }
 }
 
 function stripDiacritics(s){
