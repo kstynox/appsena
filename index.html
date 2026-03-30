@@ -1,15 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-M8MVFDHC');</script>
-<!-- End Google Tag Manager -->
-
-  <meta charset="utf-8" />
+<meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Aplicaciones para la FPI</title>
   <style>
@@ -150,13 +142,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .modal-body iframe{ width:100%; height: min(72vh, 760px); border:0; }
     .modal.large .modal-body iframe{ height: min(88vh, 920px); }
     @media (max-width: 640px){ .modal-body iframe{ height: 72vh; } .modal.large .modal-body iframe{ height: 86vh; } }
+  
+    /* Seguimiento local */
+    .analytics-grid{ display:grid; grid-template-columns:minmax(280px,1fr) auto auto auto; gap:10px; align-items:end; }
+    .analytics-field{ display:flex; flex-direction:column; gap:6px; min-width:240px; }
+    .analytics-field span{ font-size:12px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+    .analytics-note{ margin-top:10px; font-size:12px; line-height:1.45; color:var(--muted); }
+    .analytics-meta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .analytics-meta .pill-badge{ background:var(--soft); }
+    @media (max-width: 980px){
+      .analytics-grid{ grid-template-columns:1fr; }
+      .analytics-grid .btn, .analytics-grid .pill-badge{ width:100%; justify-content:center; }
+    }
+    .analytics-note strong{ color:var(--brand2); }
+
   </style>
+
+  <script type="text/javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-  <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8MVFDHC"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
 <header class="site-header">
   <div class="header-wrap">
     <div class="header-left">
@@ -185,6 +189,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
   </section>
+
+
+  
+
+  <div id="analyticsHiddenControls" hidden>
+    <input id="analyticsUser" type="text" value="" aria-hidden="true" />
+    <button id="clearAnalyticsBtn" type="button" aria-hidden="true">Borrar registros</button>
+    <span id="analyticsCount"></span>
+    <span id="analyticsSession"></span>
+    <span id="analyticsGeo"></span>
+    <span id="analyticsFileStatus"></span>
+    <span id="analyticsLastSave"></span>
+  </div>
+
 
   <section class="card">
     <div class="card-h"><h2>Aplicaciones</h2></div>
@@ -540,10 +558,643 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   const $large = document.getElementById("manualLargeToggle");
   const $modal = document.getElementById("manualModal");
 
+  const $analyticsUser = document.getElementById("analyticsUser");
+  const $linkExcelBtn = document.getElementById("linkExcelBtn");
+  const $clearAnalyticsBtn = document.getElementById("clearAnalyticsBtn");
+  const $analyticsCount = document.getElementById("analyticsCount");
+  const $analyticsSession = document.getElementById("analyticsSession");
+  const $analyticsGeo = document.getElementById("analyticsGeo");
+  const $analyticsFileStatus = document.getElementById("analyticsFileStatus");
+  const $analyticsLastSave = document.getElementById("analyticsLastSave");
+
+  const FILE_MODE = location.protocol === "file:";
+  const ANALYTICS_STORAGE_KEY = "fpi_tracking_logs_v1";
+  const ANALYTICS_USER_KEY = "fpi_tracking_user_v1";
+  const ANALYTICS_GEO_KEY = "fpi_tracking_geo_v1";
+  const ANALYTICS_LOG_DB = "fpi_tracking_logs_db";
+  const ANALYTICS_LOG_STORE = "logs";
+  const ANALYTICS_LOG_KEY = "logs_v1";
+  const ANALYTICS_HANDLE_DB = "fpi_tracking_handle_db";
+  const ANALYTICS_HANDLE_STORE = "handles";
+  const ANALYTICS_HANDLE_KEY = "excel_handle_v1";
+  const sessionId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ("sess-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+  const sessionStartedAt = Date.now();
+  let visibleStartedAt = document.visibilityState === "visible" ? Date.now() : null;
+  let visibleAccumMs = 0;
+  let analyticsGeo = null;
+  let searchDebounce = null;
+  let exitLogged = false;
+  let excelFileHandle = null;
+  let autoSaveTimer = null;
+  let isSavingExcel = false;
+  let pendingSaveAfterCurrent = false;
+  let lastSavedAt = "";
+  let analyticsLogsCache = [];
+
   const roles = ["Todos", ...Object.keys(roleBadges)];
   let activeRole = "Todos";
 
-  function stripDiacritics(s){
+
+
+function compactLogEntry(entry){
+  const out = {};
+  const limitMap = {
+    pageTitle: 120,
+    pageUrl: 240,
+    path: 180,
+    referrer: 240,
+    searchTerm: 120,
+    targetHref: 240,
+    targetText: 120,
+    actionDetail: 160,
+    browserLanguage: 40,
+    browserLanguages: 80,
+    platform: 80,
+    vendor: 80,
+    userAgent: 220,
+    screenSize: 24,
+    viewportSize: 24,
+    timezone: 64,
+    ip: 64,
+    country: 80,
+    region: 80,
+    city: 80,
+    isp: 120,
+    organization: 120
+  };
+  for(const [key, value] of Object.entries(entry || {})){
+    if(value == null){
+      out[key] = "";
+      continue;
+    }
+    const normalized = typeof value === "string" ? value.replace(/\s+/g, " ").trim() : value;
+    if(typeof normalized === "string" && limitMap[key]){
+      out[key] = normalized.slice(0, limitMap[key]);
+    } else {
+      out[key] = normalized;
+    }
+  }
+  return out;
+}
+
+function openLogsDb(){
+  return new Promise((resolve, reject) => {
+    if(!("indexedDB" in window)){
+      reject(new Error("IndexedDB no disponible"));
+      return;
+    }
+    const request = indexedDB.open(ANALYTICS_LOG_DB, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if(!db.objectStoreNames.contains(ANALYTICS_LOG_STORE)){
+        db.createObjectStore(ANALYTICS_LOG_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function persistLogsToDb(logs){
+  try {
+    const db = await openLogsDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(ANALYTICS_LOG_STORE, "readwrite");
+      tx.objectStore(ANALYTICS_LOG_STORE).put(logs, ANALYTICS_LOG_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+    return true;
+  } catch(err){
+    console.warn("No se pudo persistir en IndexedDB:", err);
+    try {
+      localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(logs.slice(-250)));
+    } catch(e){}
+    return false;
+  }
+}
+
+async function loadLogsFromDb(){
+  try {
+    const db = await openLogsDb();
+    const result = await new Promise((resolve, reject) => {
+      const tx = db.transaction(ANALYTICS_LOG_STORE, "readonly");
+      const req = tx.objectStore(ANALYTICS_LOG_STORE).get(ANALYTICS_LOG_KEY);
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+    db.close();
+    analyticsLogsCache = Array.isArray(result) ? result : [];
+    return analyticsLogsCache;
+  } catch(err){
+    try {
+      const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      analyticsLogsCache = Array.isArray(parsed) ? parsed : [];
+    } catch(e){
+      analyticsLogsCache = [];
+    }
+    return analyticsLogsCache;
+  }
+}
+
+async function clearLogsDb(){
+  analyticsLogsCache = [];
+  try {
+    const db = await openLogsDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(ANALYTICS_LOG_STORE, "readwrite");
+      tx.objectStore(ANALYTICS_LOG_STORE).delete(ANALYTICS_LOG_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  } catch(err){}
+  try { localStorage.removeItem(ANALYTICS_STORAGE_KEY); } catch(e){}
+}
+
+function getLogs(){
+  return Array.isArray(analyticsLogsCache) ? analyticsLogsCache : [];
+}
+
+function saveLogs(logs){
+  const input = Array.isArray(logs) ? logs : [];
+  const clean = input.map(compactLogEntry).slice(-1200);
+  analyticsLogsCache = clean;
+  persistLogsToDb(clean);
+  updateAnalyticsUi();
+}
+
+function nowIso(){
+
+    return new Date().toISOString();
+  }
+
+  function getSessionSeconds(){
+    return Number(((Date.now() - sessionStartedAt) / 1000).toFixed(2));
+  }
+
+  function getVisibleSeconds(){
+    let total = visibleAccumMs;
+    if(visibleStartedAt) total += (Date.now() - visibleStartedAt);
+    return Number((total / 1000).toFixed(2));
+  }
+
+  function getViewportSize(){
+    return `${window.innerWidth || ""}x${window.innerHeight || ""}`;
+  }
+
+  function getScreenSize(){
+    return `${screen.width || ""}x${screen.height || ""}`;
+  }
+
+  function getActiveUser(){
+    return ($analyticsUser?.value || "").trim();
+  }
+
+  function getGeoCache(){
+    try {
+      const cached = localStorage.getItem(ANALYTICS_GEO_KEY);
+      return cached ? JSON.parse(cached) : null;
+    } catch(e){
+      return null;
+    }
+  }
+
+  function setGeoBadge(){
+    if(!$analyticsGeo) return;
+    if(analyticsGeo && (analyticsGeo.country || analyticsGeo.region || analyticsGeo.city)){
+      const parts = [analyticsGeo.country, analyticsGeo.region, analyticsGeo.city].filter(Boolean);
+      $analyticsGeo.textContent = `Ubicación IP: ${parts.join(" / ")}`;
+    } else {
+      $analyticsGeo.textContent = "Ubicación IP: no disponible";
+    }
+  }
+
+  function updateAnalyticsUi(){
+    const total = getLogs().length;
+    if($analyticsCount) $analyticsCount.textContent = `${total} evento(s)`;
+    if($analyticsSession) $analyticsSession.textContent = `Sesión: ${sessionId.slice(0, 8)}`;
+    setGeoBadge();
+    setFileBadges();
+  }
+
+  function setFileBadges(){
+    if($analyticsFileStatus){
+      if(excelFileHandle && excelFileHandle.name){
+        $analyticsFileStatus.textContent = `Excel: ${excelFileHandle.name}`;
+      } else if(FILE_MODE){
+        $analyticsFileStatus.textContent = "Excel: modo local";
+      } else if(window.showSaveFilePicker){
+        $analyticsFileStatus.textContent = "Excel: no vinculado";
+      } else {
+        $analyticsFileStatus.textContent = "Excel: navegador no compatible";
+      }
+    }
+    if($linkExcelBtn){
+      $linkExcelBtn.textContent = excelFileHandle ? "Cambiar Excel local" : "Vincular Excel local";
+    }
+    if($analyticsLastSave){
+      $analyticsLastSave.textContent = `Último guardado: ${lastSavedAt || "--"}`;
+    }
+  }
+
+
+
+function normalizeGeo(data){
+  if(!data) return null;
+  if("success" in data && data.success === false) return null;
+
+  if("country_name" in data || "region" in data || "city" in data){
+    return {
+      ip: data.ip || "",
+      country: data.country_name || data.country || "",
+      region: data.region || data.region_name || "",
+      city: data.city || "",
+      latitude: data.latitude ?? data.lat ?? "",
+      longitude: data.longitude ?? data.lon ?? "",
+      timezoneId: data.timezone || data.timezone?.id || "",
+      isp: data.org || data.asn?.org || "",
+      org: data.org || data.asn?.org || ""
+    };
+  }
+
+  const connection = data.connection || {};
+  return {
+    ip: data.ip || "",
+    country: data.country || "",
+    region: data.region || "",
+    city: data.city || "",
+    latitude: data.latitude ?? "",
+    longitude: data.longitude ?? "",
+    timezoneId: data.timezone?.id || data.timezone || "",
+    isp: connection.isp || "",
+    org: connection.org || ""
+  };
+}
+
+async function tryGeoEndpoint(url){
+  const resp = await fetch(url, { cache: "no-store" });
+  if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const data = await resp.json();
+  return normalizeGeo(data);
+}
+
+async function loadGeoData(){
+  analyticsGeo = getGeoCache();
+  updateAnalyticsUi();
+  if(FILE_MODE) return;
+  const endpoints = [
+    "https://ipapi.co/json/",
+    "https://ipwho.is/?fields=success,ip,country,region,city,latitude,longitude,timezone,connection"
+  ];
+  for(const endpoint of endpoints){
+    try {
+      const normalized = await tryGeoEndpoint(endpoint);
+      if(normalized){
+        analyticsGeo = normalized;
+        localStorage.setItem(ANALYTICS_GEO_KEY, JSON.stringify(normalized));
+        updateAnalyticsUi();
+        return;
+      }
+    } catch(e){}
+  }
+}
+
+function commonEventData(){
+
+    return {
+      timestamp: nowIso(),
+      eventType: "",
+      sessionId,
+      sessionSeconds: getSessionSeconds(),
+      visibleSeconds: getVisibleSeconds(),
+      userLabel: getActiveUser(),
+      pageTitle: document.title,
+      pageUrl: location.href,
+      path: location.pathname,
+      referrer: document.referrer || "",
+      searchTerm: ($q?.value || "").trim(),
+      activeRole,
+      browserLanguage: navigator.language || "",
+      browserLanguages: (navigator.languages || []).join(", "),
+      platform: (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "",
+      vendor: navigator.vendor || "",
+      userAgent: navigator.userAgent || "",
+      screenSize: getScreenSize(),
+      viewportSize: getViewportSize(),
+      timezone: (Intl.DateTimeFormat().resolvedOptions().timeZone) || "",
+      online: navigator.onLine ? "online" : "offline",
+      cookieEnabled: FILE_MODE ? "" : (navigator.cookieEnabled ? "true" : "false"),
+      hardwareConcurrency: navigator.hardwareConcurrency ?? "",
+      deviceMemory: navigator.deviceMemory ?? "",
+      ip: analyticsGeo?.ip || "",
+      country: analyticsGeo?.country || "",
+      region: analyticsGeo?.region || "",
+      city: analyticsGeo?.city || "",
+      latitude: analyticsGeo?.latitude ?? "",
+      longitude: analyticsGeo?.longitude ?? "",
+      isp: analyticsGeo?.isp || "",
+      organization: analyticsGeo?.org || ""
+    };
+  }
+
+
+  function openHandleDb(){
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(ANALYTICS_HANDLE_DB, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if(!db.objectStoreNames.contains(ANALYTICS_HANDLE_STORE)){
+          db.createObjectStore(ANALYTICS_HANDLE_STORE);
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function saveHandleToDb(handle){
+    if(!("indexedDB" in window)) return;
+    const db = await openHandleDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(ANALYTICS_HANDLE_STORE, "readwrite");
+      tx.objectStore(ANALYTICS_HANDLE_STORE).put(handle, ANALYTICS_HANDLE_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }
+
+  async function readHandleFromDb(){
+    if(!("indexedDB" in window)) return null;
+    const db = await openHandleDb();
+    const result = await new Promise((resolve, reject) => {
+      const tx = db.transaction(ANALYTICS_HANDLE_STORE, "readonly");
+      const req = tx.objectStore(ANALYTICS_HANDLE_STORE).get(ANALYTICS_HANDLE_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+    db.close();
+    return result;
+  }
+
+  async function clearHandleFromDb(){
+    if(!("indexedDB" in window)) return;
+    const db = await openHandleDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(ANALYTICS_HANDLE_STORE, "readwrite");
+      tx.objectStore(ANALYTICS_HANDLE_STORE).delete(ANALYTICS_HANDLE_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }
+
+  async function queryWritePermission(handle){
+    if(!handle?.queryPermission) return false;
+    try {
+      return (await handle.queryPermission({ mode: "readwrite" })) === "granted";
+    } catch(e){
+      return false;
+    }
+  }
+
+  async function requestWritePermission(handle){
+    if(!handle?.requestPermission) return false;
+    try {
+      return (await handle.requestPermission({ mode: "readwrite" })) === "granted";
+    } catch(e){
+      return false;
+    }
+  }
+
+  function trackEvent(eventType, extra = {}){
+    const logs = getLogs();
+    logs.push({
+      ...commonEventData(),
+      eventType,
+      ...extra
+    });
+    saveLogs(logs);
+    scheduleAutoSaveExcel();
+  }
+
+  function projectContextFromElement(el){
+    const card = el?.closest?.(".proj");
+    return {
+      projectId: card?.dataset.projectId || "",
+      projectName: card?.dataset.projectName || "",
+      projectCategory: card?.dataset.projectCategory || "",
+      projectUrl: card?.dataset.projectUrl || ""
+    };
+  }
+
+  function buildSummaryRows(logs){
+    const counts = logs.reduce((acc, row) => {
+      const key = row.eventType || "sin_evento";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+    return [
+      { metrica: "exportado_en", valor: nowIso() },
+      { metrica: "total_eventos", valor: logs.length },
+      { metrica: "sesiones_unicas", valor: new Set(logs.map(r => r.sessionId)).size },
+      ...Object.entries(counts).map(([k, v]) => ({ metrica: `event_${k}`, valor: v }))
+    ];
+  }
+
+  function buildWorkbook(){
+    const logs = getLogs();
+    const headers = [
+      "timestamp","eventType","sessionId","sessionSeconds","visibleSeconds","userLabel","pageTitle","pageUrl","path","referrer","searchTerm","activeRole",
+      "projectId","projectName","projectCategory","projectUrl","targetHref","targetText","actionDetail","browserLanguage","browserLanguages","platform","vendor","userAgent",
+      "screenSize","viewportSize","timezone","online","cookieEnabled","hardwareConcurrency","deviceMemory","ip","country","region","city","latitude","longitude","isp","organization"
+    ];
+
+    const rows = logs.map(log => {
+      const out = {};
+      headers.forEach(h => { out[h] = (log[h] ?? ""); });
+      return out;
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+    ws["!cols"] = headers.map(h => ({ wch: Math.min(Math.max(h.length + 2, 12), 28) }));
+    XLSX.utils.book_append_sheet(wb, ws, "Eventos");
+
+    const summaryRows = buildSummaryRows(logs);
+    const ws2 = XLSX.utils.json_to_sheet(summaryRows, { header: ["metrica", "valor"] });
+    ws2["!cols"] = [{ wch: 24 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, ws2, "Resumen");
+    return wb;
+  }
+
+  async function flushLogsToLinkedFile(force = false){
+    if(!excelFileHandle || !window.XLSX) return false;
+    if(isSavingExcel){
+      pendingSaveAfterCurrent = true;
+      return false;
+    }
+    const logs = getLogs();
+    if(!logs.length && !force) return false;
+
+    isSavingExcel = true;
+    try {
+      const hasPermission = (await queryWritePermission(excelFileHandle)) || (force && await requestWritePermission(excelFileHandle));
+      if(!hasPermission){
+        updateAnalyticsUi();
+        return false;
+      }
+
+      const wb = buildWorkbook();
+      const data = XLSX.write(wb, { bookType: "xlsx", type: "array", compression: true });
+      const writable = await excelFileHandle.createWritable();
+      await writable.write(data);
+      await writable.close();
+      lastSavedAt = new Date().toLocaleString("es-CO");
+      updateAnalyticsUi();
+      return true;
+    } catch(err){
+      console.error("No se pudo guardar el Excel automáticamente:", err);
+      return false;
+    } finally {
+      isSavingExcel = false;
+      if(pendingSaveAfterCurrent){
+        pendingSaveAfterCurrent = false;
+        scheduleAutoSaveExcel(true);
+      }
+    }
+  }
+
+  function scheduleAutoSaveExcel(immediate = false){
+    if(!excelFileHandle) return;
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+      flushLogsToLinkedFile(false);
+    }, immediate ? 200 : 1800);
+  }
+
+  async function linkExcelFile(){
+    if(!window.showSaveFilePicker){
+      alert("Este navegador no permite escritura automática a un archivo Excel local. Usa Chrome o Edge de escritorio.");
+      return;
+    }
+    if(!window.XLSX){
+      alert("No se pudo cargar la librería de Excel.");
+      return;
+    }
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: "seguimiento_automatico.xlsx",
+        types: [{
+          description: "Archivo de Excel",
+          accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] }
+        }]
+      });
+      const granted = await requestWritePermission(handle);
+      if(!granted){
+        alert("No se concedió permiso para escribir el archivo.");
+        return;
+      }
+      excelFileHandle = handle;
+      await saveHandleToDb(handle);
+      updateAnalyticsUi();
+      await flushLogsToLinkedFile(true);
+    } catch(err){
+      if(err && err.name !== "AbortError"){
+        console.error(err);
+        alert("No fue posible vincular el archivo Excel.");
+      }
+    }
+  }
+
+  async function restoreLinkedFile(){
+    try {
+      const stored = await readHandleFromDb();
+      if(!stored) {
+        updateAnalyticsUi();
+        return;
+      }
+      excelFileHandle = stored;
+      updateAnalyticsUi();
+      if(await queryWritePermission(excelFileHandle)){
+        scheduleAutoSaveExcel(true);
+      }
+    } catch(err){
+      console.warn("No se pudo restaurar el archivo vinculado:", err);
+      excelFileHandle = null;
+      await clearHandleFromDb();
+      updateAnalyticsUi();
+    }
+  }
+
+
+async function initAnalytics(){
+  await loadLogsFromDb();
+
+  if($analyticsUser){
+    $analyticsUser.value = localStorage.getItem(ANALYTICS_USER_KEY) || "";
+    $analyticsUser.addEventListener("input", () => {
+      localStorage.setItem(ANALYTICS_USER_KEY, getActiveUser());
+      scheduleAutoSaveExcel();
+    });
+  }
+
+  $linkExcelBtn?.addEventListener("click", linkExcelFile);
+  $clearAnalyticsBtn?.addEventListener("click", async () => {
+    if(confirm("¿Borrar todos los registros guardados en este navegador?")){
+      await clearLogsDb();
+      updateAnalyticsUi();
+      scheduleAutoSaveExcel(true);
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest(".proj a[href]");
+    if(link){
+      trackEvent("open_link", {
+        ...projectContextFromElement(link),
+        targetHref: link.href || "",
+        targetText: (link.textContent || "").trim(),
+        actionDetail: "abrir_aplicacion"
+      });
+    }
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "hidden"){
+      if(visibleStartedAt){
+        visibleAccumMs += (Date.now() - visibleStartedAt);
+        visibleStartedAt = null;
+      }
+      scheduleAutoSaveExcel(true);
+    } else if(document.visibilityState === "visible" && !visibleStartedAt){
+      visibleStartedAt = Date.now();
+    }
+  });
+
+  const logExit = (reason) => {
+    if(exitLogged) return;
+    exitLogged = true;
+    trackEvent("page_exit", { actionDetail: reason });
+    scheduleAutoSaveExcel(true);
+  };
+  window.addEventListener("pagehide", () => logExit("pagehide"));
+  window.addEventListener("beforeunload", () => logExit("beforeunload"));
+
+  setInterval(() => {
+    trackEvent("heartbeat", { actionDetail: "60s" });
+  }, 60000);
+
+  updateAnalyticsUi();
+  loadGeoData();
+  restoreLinkedFile();
+  trackEvent("page_view", { actionDetail: FILE_MODE ? "entrada_local" : "entrada" });
+}
+
+function stripDiacritics(s){
     return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   }
 
@@ -598,7 +1249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }).join("");
 
     $filters.querySelectorAll(".chip").forEach(ch => {
-      const activate = () => { activeRole = ch.dataset.role; render(); };
+      const activate = () => { activeRole = ch.dataset.role; render(); trackEvent("filter_role", { actionDetail: "seleccion_rol", targetText: activeRole }); };
       ch.addEventListener("click", activate);
       ch.addEventListener("keydown", (e) => { if(e.key === "Enter" || e.key === " ") activate(); });
     });
@@ -625,39 +1276,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     return m ? m[1] : "";
   }
 
-  function openManual(project){
-    const key = project.id;
-    const iframeHtml = manuals[key];
-    const src = parseIframeSrc(iframeHtml);
 
-    $title.textContent = "Manual de usuario";
-    $sub.textContent = project.name;
-    $openNew.href = src || "#";
-    $openDrive.href = src || "#";
-    $openNew.style.display = src ? "inline-flex" : "none";
-    $openDrive.style.display = src ? "inline-flex" : "none";
+function openManual(project){
+  trackEvent("open_manual", { projectId: project.id || "", projectName: project.name || "", projectCategory: project.category || "", projectUrl: project.url || "", actionDetail: "modal_manual" });
+  const key = project.id;
+  const iframeHtml = manuals[key];
+  const src = parseIframeSrc(iframeHtml);
 
-    $large.checked = false;
-    $modal.classList.remove('large');
+  $title.textContent = "Manual de usuario";
+  $sub.textContent = project.name;
+  $openNew.href = src || "#";
+  $openDrive.href = src || "#";
+  $openNew.style.display = src ? "inline-flex" : "none";
+  $openDrive.style.display = src ? "inline-flex" : "none";
 
-    $body.innerHTML = `<div class="modal-loading" id="manualLoading">Cargando manual…</div>`;
-    const loadingEl = $body.querySelector("#manualLoading");
+  $large.checked = false;
+  $modal.classList.remove('large');
 
-    if(src){
-      const iframe = document.createElement("iframe");
-      iframe.setAttribute("title", "Manual de usuario");
-      iframe.loading = "lazy";
-      iframe.src = src;
-      iframe.addEventListener("load", () => {
-        if(loadingEl) loadingEl.style.display = "none";
-      });
-      $body.appendChild(iframe);
-    } else {
-      if(loadingEl) loadingEl.textContent = "Manual no configurado para este proyecto.";
+  $body.innerHTML = `<div class="modal-loading" id="manualLoading">Cargando manual…</div>`;
+  const loadingEl = $body.querySelector("#manualLoading");
+
+  if(src && !FILE_MODE){
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("title", "Manual de usuario");
+    iframe.loading = "lazy";
+    iframe.referrerPolicy = "no-referrer-when-downgrade";
+    iframe.src = src;
+    iframe.addEventListener("load", () => {
+      if(loadingEl) loadingEl.style.display = "none";
+    });
+    iframe.addEventListener("error", () => {
+      if(loadingEl){
+        loadingEl.innerHTML = `No se pudo previsualizar el manual. Usa <a href="${esc(src)}" target="_blank" rel="noopener">Abrir en pestaña</a>.`;
+      }
+    });
+    $body.appendChild(iframe);
+  } else if(src && FILE_MODE){
+    if(loadingEl){
+      loadingEl.innerHTML = `La vista previa embebida no funciona bien en modo local (<code>file://</code>). Usa <a href="${esc(src)}" target="_blank" rel="noopener">Abrir en pestaña</a> o prueba el HTML publicado en GitHub Pages.`;
     }
-
-    $overlay.classList.add("show");
+  } else {
+    if(loadingEl) loadingEl.textContent = "Manual no configurado para este proyecto.";
   }
+
+  $overlay.classList.add("show");
+}
+
 
   function closeManual(){
     $overlay.classList.remove("show");
@@ -670,6 +1334,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   $large.addEventListener("change", () => {
     if($large.checked) $modal.classList.add("large");
     else $modal.classList.remove("large");
+  });
+  $openNew.addEventListener("click", () => {
+    trackEvent("manual_external", { targetHref: $openNew.href || "", targetText: "Abrir en pestaña", actionDetail: $sub.textContent || "" });
+  });
+  $openDrive.addEventListener("click", () => {
+    trackEvent("manual_external", { targetHref: $openDrive.href || "", targetText: "Abrir Drive", actionDetail: $sub.textContent || "" });
   });
 
   function normalizeLines(s){
@@ -786,7 +1456,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const outputsHtml = outputsItems.length > 1 ? `<ul>${outputsItems.map(it=>`<li>${highlightLinkify(it, $q.value)}</li>`).join("")}</ul>` : highlightLinkify(p.outputs, $q.value);
 
     return `
-      <article class="proj" id="${esc(p.id)}">
+      <article class="proj" id="${esc(p.id)}" data-project-id="${esc(p.id)}" data-project-name="${esc(p.name)}" data-project-category="${esc(p.category || '')}" data-project-url="${esc(url)}">
         <div class="proj-top">
           <div class="proj-icon" aria-hidden="true">${projectIcon(p)}</div>
           <div class="proj-badges">${roleBadgesHtml}</div>
@@ -842,6 +1512,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         const url = btn.dataset.copy || "";
         try {
           await navigator.clipboard.writeText(url);
+          trackEvent("copy_url", { ...projectContextFromElement(btn), targetHref: url, targetText: "Copiar", actionDetail: "copiar_url" });
           const prev = btn.textContent;
           btn.textContent = "Copiado";
           setTimeout(() => btn.textContent = prev, 1100);
@@ -875,10 +1546,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           details.removeAttribute("hidden");
           void details.offsetHeight;
           details.classList.add("open");
+          trackEvent("toggle_details", { ...projectContextFromElement(btn), targetText: "Ver menos", actionDetail: "abrir_detalle" });
           btn.textContent = "Ver menos";
           btn.setAttribute("aria-label","Ver menos detalles");
         } else {
           details.classList.remove("open");
+          trackEvent("toggle_details", { ...projectContextFromElement(btn), targetText: "Ver más", actionDetail: "cerrar_detalle" });
           btn.textContent = "Ver más";
           btn.setAttribute("aria-label","Ver más detalles");
           setTimeout(() => details.setAttribute("hidden",""), 220);
@@ -897,14 +1570,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     wireToggles();
   }
 
-  $q.addEventListener("input", render);
+  $q.addEventListener("input", () => {
+    render();
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => {
+      trackEvent("search", { targetText: ($q.value || "").trim(), actionDetail: "busqueda" });
+    }, 450);
+  });
   $clearBtn.addEventListener("click", () => {
     $q.value = "";
     activeRole = "Todos";
     renderFilters();
     render();
+    trackEvent("clear_filters", { actionDetail: "limpiar_filtros" });
   });
 
+  initAnalytics().catch(err => console.error("Error inicializando analítica:", err));
   renderFilters();
   render();
 </script>
