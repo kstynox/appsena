@@ -85,6 +85,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .badge.role.aprendiz{ background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.22); color:#0b3a7a; }
     .badge.role.coordinador{ background: rgba(168,85,247,.12); border-color: rgba(168,85,247,.22); color:#4b1a7a; }
     .badge.new{ background:#ef4444; border-color:#dc2626; color:#fff; letter-spacing:.04em; }
+    .badge.featured{ background:#fff7ed; border-color:#f59e0b; color:#9a5a00; }
+    .badge.status{ background:#ecfdf5; border-color:#a7f3d0; color:#047857; }
+    .tag-list{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .tag{ display:inline-flex; align-items:center; border:1px solid #dbe3ef; background:#fff; color:#475569; border-radius:999px; padding:4px 7px; font-size:10px; font-weight:850; }
 
     .proj-main{ padding: 0 16px 12px; }
     .proj-title{ font-weight:950; margin:0; font-size:16px; line-height:1.2; }
@@ -227,9 +231,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <label class="btn small subtle" style="gap:10px;cursor:pointer" aria-label="Cambiar tamaño del visor">
           <input id="manualLargeToggle" type="checkbox" style="accent-color: var(--brand); width:16px; height:16px;" /> Ver en grande
         </label>
-        <a class="btn small subtle" id="manualOpenDrive" href="#" target="_blank" rel="noopener" aria-label="Abrir manual en Drive"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <a class="btn small subtle" id="manualOpenDrive" href="#" target="_blank" rel="noopener" aria-label="Abrir manual en nueva pestaña"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
   <path fill="currentColor" d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z"/>
-</svg> Abrir Drive</a>
+</svg> Abrir manual</a>
         <a class="btn small" id="manualOpenNew" href="#" target="_blank" rel="noopener" aria-label="Abrir manual en pestaña nueva"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
   <path fill="currentColor" d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z"/>
 </svg> Abrir en pestaña</a>
@@ -242,6 +246,141 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
   const projects = [
+  {
+    "id": "analitica-certificados-sena",
+    "name": "Analítica de Certificados SENA",
+    "category": "Analítica y Reportes",
+    "roles": ["Coordinador", "Instructor"],
+    "inputs": "Múltiples reportes de certificados de Formación Titulada y Complementaria; PE-04 opcional",
+    "outputs": "Indicadores, comparativos y reportes en PDF, Excel y CSV",
+    "needs": "Navegador moderno; procesamiento local en el equipo",
+    "url": "https://lokyapps.com/apps/senapps/certificados/",
+    "desc": "Aplicación para consolidar y analizar certificados de Formación Titulada y Complementaria del SENA. Permite cargar múltiples reportes, comparar periodos, analizar programas, fichas, aprendices y territorio, complementar la información con PE-04 y generar reportes en PDF, Excel y CSV.",
+    "emoji": "🎓",
+    "isNew": true,
+    "featured": true,
+    "status": "Disponible",
+    "tags": ["SENA", "certificados", "certificación", "formación titulada"]
+  },
+
+  {
+    "id": "analitica-inasistencias-sena",
+    "name": "Analítica de Inasistencias SENA",
+    "category": "Analítica y seguimiento académico",
+    "roles": ["Coordinador", "Instructor"],
+    "inputs": "Reportes de inasistencias SENA",
+    "outputs": "Indicadores, gráficas, filtros y exportaciones en CSV y PDF",
+    "needs": "Navegador moderno; procesamiento local en el navegador",
+    "url": "https://lokyapps.com/apps/senapps/inasistencias/",
+    "desc": "Aplicación de analítica para consolidar y analizar reportes de inasistencias SENA. Permite revisar la calidad de los datos, identificar registros sin justificación, aplicar filtros por ficha, programa, instructor, estado y fechas, consultar indicadores y gráficas de seguimiento y exportar los resultados en CSV y PDF. El procesamiento de los archivos se realiza localmente en el navegador.",
+    "emoji": "📉",
+    "isNew": true,
+    "featured": true,
+    "status": "Disponible",
+    "tags": ["inasistencias", "asistencia", "aprendices", "instructores"]
+  },
+
+  {
+    "id": "gae-analitica-educativa",
+    "name": "GAE Analítica Educativa",
+    "category": "Analítica y Gestión Educativa",
+    "roles": ["Coordinador", "Instructor"],
+    "inputs": "PE-04, DF-14A, DF-49, DF-51, DF-53 y fuentes opcionales como DF-03 e informe de instructores",
+    "outputs": "Dashboard, alertas, mapa, SAT, Ficha 360°, análisis histórico y reportes",
+    "needs": "Navegador moderno; procesamiento local en el equipo",
+    "url": "https://lokyapps.com/apps/senapps/GAE_360/",
+    "desc": "Herramienta de analítica para consolidar y analizar reportes de Gestión Educativa SENA. Integra fuentes PE-04, DF-14A, DF-49, DF-51, DF-53 y fuentes opcionales como DF-03 e informe de instructores, permitiendo consultar indicadores, alertas, Dashboard, mapa, SAT, Ficha 360°, instructores, programas, ocupación, efectividad, calidad de datos, histórico y reportes. El procesamiento se realiza localmente en el equipo.",
+    "emoji": "📈",
+    "isNew": true,
+    "featured": true,
+    "status": "Disponible",
+    "tags": ["GAE", "analítica educativa", "gestión educativa", "SENA"]
+  },
+
+  {
+    "id": "lokycaso",
+    "name": "LokyCaso",
+    "category": "Juegos y Gamificación / Decisiones y casos",
+    "roles": ["Instructor", "Aprendiz"],
+    "inputs": "Escenarios, etapas, roles, decisiones, competencias e indicadores",
+    "outputs": "Simulación interactiva y evaluación de alternativas y consecuencias",
+    "needs": "Navegador moderno",
+    "url": "https://lokyapps.com/apps/Caso/",
+    "manualUrl": "https://lokyapps.com/docs/01_LokyCaso_Manual_Usuario.pdf",
+    "desc": "Simulador de casos por etapas, roles y decisiones. Evalúa alternativas, consecuencias, competencias e indicadores a través de escenarios.",
+    "emoji": "🧩",
+    "featured": true,
+    "status": "Disponible",
+    "tags": ["Casos", "Decisiones", "Roles", "Competencias"]
+  },
+
+  {
+    "id": "lokyclasifica",
+    "name": "LokyClasifica",
+    "category": "Juegos y Gamificación / Clasificación dinámica",
+    "roles": ["Instructor", "Aprendiz"],
+    "inputs": "Bancos XLSX, CSV o TXT; categorías y configuración de juego",
+    "outputs": "Juego HTML independiente y reporte PDF",
+    "needs": "Navegador moderno",
+    "url": "https://lokyapps.com/apps/Clasifica/",
+    "manualUrl": "https://lokyapps.com/docs/04_LokyClasifica_Manual_Usuario.pdf",
+    "desc": "Juego de clasificación dinámica con banda transportadora, muelle, modo rápido y mixto. Carga bancos XLSX/CSV/TXT, configura categorías y genera un HTML independiente con reporte PDF.",
+    "emoji": "🏭",
+    "featured": true,
+    "status": "Disponible",
+    "tags": ["Clasificación", "Decisión", "Velocidad", "Categorías"]
+  },
+
+  {
+    "id": "lokyspace",
+    "name": "LokySpace",
+    "category": "Juegos y Gamificación / Arcade educativo",
+    "roles": ["Instructor", "Aprendiz"],
+    "inputs": "Banco de elementos y configuración del reto",
+    "outputs": "Resultados, revisión de errores y reportes",
+    "needs": "Navegador moderno",
+    "url": "https://lokyapps.com/apps/Space/",
+    "manualUrl": "https://lokyapps.com/docs/09_LokySpace_Manual_Usuario.pdf",
+    "desc": "Arcade de reacción y clasificación que mide aciertos, eficiencia y control bajo presión, con resultados, revisión de errores y reportes.",
+    "emoji": "🚀",
+    "featured": true,
+    "status": "Disponible",
+    "tags": ["Arcade", "Reacción", "Clasificación", "Diagnóstico"]
+  },
+
+  {
+    "id": "lokytime",
+    "name": "LokyTime",
+    "category": "Juegos y Gamificación / Reto cronológico",
+    "roles": ["Instructor", "Aprendiz"],
+    "inputs": "Acontecimientos con año, mes o fecha completa y configuración del reto",
+    "outputs": "Actividad cronológica, resultados y reportes",
+    "needs": "Navegador moderno",
+    "url": "https://lokyapps.com/apps/LokyTime/",
+    "manualUrl": "https://lokyapps.com/docs/12_LokyTime_Manual_Usuario.pdf",
+    "desc": "Actividad para reconocer acontecimientos por año, mes o fecha completa, con temporizador, aleatorización, recuperación de sesión y reportes.",
+    "emoji": "⏳",
+    "status": "Disponible",
+    "tags": ["Historia", "Fechas", "Reto", "Evaluación"]
+  },
+
+  {
+    "id": "ronda-saberes",
+    "name": "Ronda de Saberes",
+    "category": "Juegos y Gamificación / Ronda oral gamificada",
+    "roles": ["Instructor", "Aprendiz"],
+    "inputs": "Participantes, temas y bancos XLSX/CSV",
+    "outputs": "Evaluación rápida, análisis grupal y exportaciones Excel/PDF",
+    "needs": "Navegador moderno",
+    "url": "https://lokyapps.com/apps/Ronda_de_Saberes/",
+    "manualUrl": "https://lokyapps.com/docs/02_Ronda_de_Saberes_Manual_Usuario.pdf",
+    "desc": "Rondas por participantes y temas con temporizador, bancos XLSX/CSV, evaluación rápida, análisis grupal y exportación a Excel/PDF.",
+    "emoji": "🎤",
+    "featured": true,
+    "status": "Disponible",
+    "tags": ["Ronda", "Preguntas", "Participantes", "Reportes"]
+  },
+
   {
     "id": "disenos-curriculares",
     "name": "Diseños Curriculares",
@@ -287,7 +426,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     "inputs": "Listado texto (fecha + nombre)",
     "outputs": "Calendario + impresión/PDF",
     "needs": "Navegador moderno (sin backend)",
-    "url": "https://calendarioeventos-ia7j.onrender.com",
+    "url": "https://lokyapps.com/apps/Fechas/",
     "desc": "Calendario anual con captura por líneas (fecha y nombre), normalización y opción de guardado en navegador.",
     "emoji": "🎂"
   },
@@ -302,7 +441,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     "inputs": "Archivos locales (PDF/DOCX/XLSX/PPTX/imágenes/texto, etc.)",
     "outputs": "Grupos duplicados + pares de similitud + exportaciones",
     "needs": "Navegador moderno + librerías (pdf.js, mammoth, jsPDF)",
-    "url": "https://auditordedocumentos.onrender.com",
+    "url": "https://lokyapps.com/apps/scan/",
     "desc": "Analiza localmente duplicados exactos (SHA-256) y similitud de contenido. No sube archivos a internet.",
     "emoji": "🕵️‍♂️"
   },
@@ -377,7 +516,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     "inputs": "Excel con banco de preguntas",
     "outputs": "Quiz generado (web)",
     "needs": "Navegador moderno + Tailwind + xlsx",
-    "url": "https://quizsena.onrender.com",
+    "url": "https://lokyapps.com/apps/Quizz/",
     "desc": "Generador de quiz a partir de Excel, interfaz moderna y carga/parseo en navegador.",
     "emoji": "🧠"
   },
@@ -393,7 +532,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     "inputs": "Imágenes (carpeta o selección múltiple) + datos (título, instructor, tema)",
     "outputs": "Juego Quizz / Aleatorio + exporta 1 HTML",
     "needs": "Navegador moderno (offline).",
-    "url": "https://quizzimage.onrender.com",
+    "url": "https://lokyapps.com/apps/QuizzImage/",
     "desc": "Generador offline que construye un juego tipo quizz basado en imágenes: carga banco, configura modo, opciones y temporizador (solo Quizz) y exporta un HTML listo para usar.",
     "emoji": "🧠",
     "iconTop": "🧠",
@@ -411,7 +550,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     "inputs": "Imagen + pines (texto/pista) + configuración",
     "outputs": "Juego interactivo (imagen con pines) + exporta 1 HTML",
     "needs": "Navegador moderno (offline).",
-    "url": "https://pingame.onrender.com",
+    "url": "https://lokyapps.com/apps/Pin/",
     "desc": "Creador offline para armar actividades tipo 'pines sobre imagen': carga una imagen, ubica pines con texto y exporta un HTML listo para compartir.",
     "emoji": "📍",
     "iconTop": "🖼️",
@@ -429,7 +568,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     "inputs": "Lista de participantes (texto o importación)",
     "outputs": "Ganadores/selección aleatoria",
     "needs": "Navegador moderno",
-    "url": "https://selectoraprendices-1.onrender.com",
+    "url": "https://lokyapps.com/apps/Sorteo/",
     "desc": "Sorteo con visualización tipo cuadros, contador y registro de ganadores.",
     "emoji": "🎯"
   },
@@ -445,7 +584,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     "inputs": "Listas de palabras/pistas o pares término–definición (pegado desde Excel o texto)",
     "outputs": "Juego previsualizado + exportación HTML (jugador) + exportación PDF",
     "needs": "Navegador moderno (sin backend)",
-    "url": "https://gamificacion-235k.onrender.com",
+    "url": "https://lokyapps.com/apps/Play/",
     "desc": "Creador de mini-juegos para gamificación (sopa de letras, crucigrama, palabra secreta, ahorcado, anagrama, emparejados, memoria y parejas) con previsualización y exportación.",
     "emoji": "🎮"
   },
@@ -461,7 +600,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     "inputs": "Carpeta local con audios/videos (mp3, mp4, webm, ogg, wav, m4a, etc.)",
     "outputs": "Tablero de bingo (25 canciones) + reproducción manual/aleatoria + descarga de tablero.html",
     "needs": "Chrome/Edge (selección de carpeta con webkitdirectory) + navegador moderno",
-    "url": "https://bingomusical-t2va.onrender.com",
+    "url": "https://lokyapps.com/apps/Bingo/",
     "desc": "Generador de Bingo Musical offline: carga una carpeta de canciones, arma una base (p. ej., 75) y selecciona 25 para jugar, con tablero autocontenido y control de reproducción.",
     "emoji": "🎵"
   },
@@ -485,8 +624,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   {
     "id": "fichas-formacion-titulada",
-    "name": "Fichas formación titulada",
-    "category": "Formación / Planeación",
+    "name": "Analítica PE-04",
+    "category": "Analítica y Gestión Educativa",
     "roles": [
       "Coordinador",
       "Instructor"
@@ -494,8 +633,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     "inputs": "Archivo PE-04 (XML de Excel 2003)",
     "outputs": "Tabla + KPIs + exportación a Excel",
     "needs": "Navegador moderno + archivo PE-04",
-    "url": "https://fichalectiva.onrender.com",
-    "desc": "Genera un reporte de fichas de formación titulada desde el PE-04, aplicando filtros y mostrando indicadores para seguimiento por modalidad, municipio y programa.",
+    "url": "https://lokyapps.com/apps/senapps/Analitica_PE04/",
+    "desc": "Analiza el reporte PE-04 de formación titulada, aplica filtros y presenta indicadores para el seguimiento por modalidad, municipio, programa y ficha.",
+    "tags": ["PE-04", "analítica", "formación titulada", "SENA"],
     "emoji": "📊"
   },
 
@@ -604,7 +744,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
 
   function makeBlob(p){
-    return stripDiacritics([p.name, p.shortName, p.category, p.desc, p.inputs, p.outputs, p.needs, (p.roles||[]).join(' ')].join(' ')).toLowerCase();
+    return stripDiacritics([p.name, p.shortName, p.category, p.desc, p.inputs, p.outputs, p.needs, p.status, (p.tags||[]).join(' '), (p.roles||[]).join(' ')].join(' ')).toLowerCase();
   }
 
   function matchesQuery(p, query){
@@ -663,7 +803,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function openManual(project){
     const key = project.id;
     const iframeHtml = manuals[key];
-    const src = parseIframeSrc(iframeHtml);
+    const src = String(project.manualUrl || parseIframeSrc(iframeHtml) || "").trim();
 
     $title.textContent = "Manual de usuario";
     $sub.textContent = project.name;
@@ -803,7 +943,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const hasUrl = !!url;
 
     const roleBadgesHtml = [
-      p.isNew ? `<span class="badge new" title="Proyecto nuevo">✨ NUEVO</span>` : "",
+      p.isNew ? `<span class="badge new" title="Proyecto nuevo">✦ NUEVO</span>` : "",
+      p.featured ? `<span class="badge featured" title="Aplicación destacada">⭐ Destacada</span>` : "",
+      p.status ? `<span class="badge status" title="Estado">${esc(p.status)}</span>` : "",
       ...(p.roles || []).map(r => {
         const b = roleBadges[r] || {emoji:"🏷️", label:r};
         const cls = roleClass(r);
@@ -844,6 +986,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div style="margin-top:10px;color:#334155;font-size:12px;line-height:1.35;">
               <b>Descripción</b><br/>${highlightLinkify(p.desc, $q.value)}
             </div>
+            ${(p.tags && p.tags.length) ? `<div style="margin-top:10px;color:#334155;font-size:12px;"><b>Etiquetas</b><div class="tag-list">${p.tags.map(t=>`<span class="tag">${highlightText(t, $q.value)}</span>`).join("")}</div></div>` : ""}
           </div>
 
           <button class="toggle" type="button" data-toggle="${esc(p.id)}" aria-label="Ver más detalles">Ver más</button>
@@ -858,9 +1001,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <button class="btn small subtle" type="button" disabled title="Enlace pendiente" aria-label="Enlace pendiente"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
   <path fill="currentColor" d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1Zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H10V7h9v14Z"/>
 </svg> Copiar</button>`}
-            <button class="btn small subtle" type="button" data-manual="${esc(p.id)}" aria-label="Abrir manual"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            ${(p.manualUrl || manuals[p.id]) ? `<button class="btn small subtle" type="button" data-manual="${esc(p.id)}" aria-label="Abrir manual"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
   <path fill="currentColor" d="M6 4h11a2 2 0 0 1 2 2v14a1 1 0 0 1-1.45.9L12 18.62 6.45 20.9A1 1 0 0 1 5 20V6a2 2 0 0 1 1-2Zm1 2v12.5l5-2.06 5 2.06V6H7Z"/>
-</svg> Manual</button>
+</svg> Manual</button>` : `<button class="btn small subtle" type="button" disabled title="Manual no configurado" aria-label="Manual no configurado">▤ Sin manual</button>`}
           </div>
           <div class="proj-actions">
             ${hasUrl ? `
